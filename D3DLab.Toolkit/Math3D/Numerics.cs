@@ -1,8 +1,11 @@
 ﻿using D3DLab.Toolkit.Math3D;
+
 using g3;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 
 namespace System.Numerics {
@@ -12,7 +15,7 @@ namespace System.Numerics {
         Intersects,
     }
 
-    public struct AlignedBoxCorners {
+    public struct BoundingBoxCorners {
         public Vector3 NearTopLeft;
         public Vector3 NearTopRight;
         public Vector3 NearBottomLeft;
@@ -100,7 +103,7 @@ namespace System.Numerics {
         public bool Intersects(ref AxisAlignedBox bb) {
             return boxf.Intersects(bb.boxf);
         }
-        public bool Intersects(ref Ray ray, out float distance) 
+        public bool Intersects(ref Ray ray, out float distance)
             => RayIntersectsBox(ref ray, out distance);
         public AxisAlignedBox Merge(in AxisAlignedBox box) {
             return new AxisAlignedBox(
@@ -132,7 +135,7 @@ namespace System.Numerics {
             uint shift5 = ((uint)h1 << 5) | ((uint)h1 >> 27);
             return ((int)shift5 + h1) ^ h2;
         }
-        
+
 
         public Vector3[] GetCorners() {
             Vector3[] corners = new Vector3[8];
@@ -169,14 +172,20 @@ namespace System.Numerics {
             for (int i = 1; i < vertices.Count; i++) {
                 Vector3 pos = vertices[i];
 
-                if (min.X > pos.X) min.X = pos.X;
-                if (max.X < pos.X) max.X = pos.X;
+                if (min.X > pos.X)
+                    min.X = pos.X;
+                if (max.X < pos.X)
+                    max.X = pos.X;
 
-                if (min.Y > pos.Y) min.Y = pos.Y;
-                if (max.Y < pos.Y) max.Y = pos.Y;
+                if (min.Y > pos.Y)
+                    min.Y = pos.Y;
+                if (max.Y < pos.Y)
+                    max.Y = pos.Y;
 
-                if (min.Z > pos.Z) min.Z = pos.Z;
-                if (max.Z < pos.Z) max.Z = pos.Z;
+                if (min.Z > pos.Z)
+                    min.Z = pos.Z;
+                if (max.Z < pos.Z)
+                    max.Z = pos.Z;
             }
 
             return new AxisAlignedBox(min, max);
@@ -190,8 +199,8 @@ namespace System.Numerics {
             return new AxisAlignedBox(min, max);
         }
 
-        public AlignedBoxCorners GetCornersBox() {
-            AlignedBoxCorners corners;
+        public BoundingBoxCorners GetCornersBox() {
+            BoundingBoxCorners corners;
             corners.NearBottomLeft = new Vector3(Minimum.X, Minimum.Y, Maximum.Z);
             corners.NearBottomRight = new Vector3(Maximum.X, Minimum.Y, Maximum.Z);
             corners.NearTopLeft = new Vector3(Minimum.X, Maximum.Y, Maximum.Z);
@@ -207,7 +216,7 @@ namespace System.Numerics {
 
         #region math methods 
 
-        bool RayIntersectsBox(ref Ray ray,  out float distance) {
+        bool RayIntersectsBox(ref Ray ray, out float distance) {
             //Source: Real-Time Collision Detection by Christer Ericson
             //Reference: Page 179
 
@@ -293,5 +302,58 @@ namespace System.Numerics {
         }
 
         #endregion
+    }
+
+    public readonly struct OrientedBoundingBox {
+        //https://www.geometrictools.com/Samples/Geometrics.html#MinimumVolumeBox3D
+        //https://www.geometrictools.com/GTE/Samples/Geometrics/MinimumVolumeBox3D/MinimumVolumeBox3DWindow3.cpp
+        public static OrientedBoundingBox Zero => new OrientedBoundingBox(Box3d.Empty);
+
+        public static unsafe OrientedBoundingBox CreateFrom(IReadOnlyList<Vector3> vertices) {
+
+            var box = new ContOrientedBox3(vertices.Select(x => x.ToVector3d()));
+            if (box.ResultValid) {
+                return new OrientedBoundingBox(box.Box);
+            }
+            return Zero;
+        }
+
+        readonly Box3d box3d;
+
+        OrientedBoundingBox(Box3d box3d) {
+            this.box3d = box3d;
+        }
+
+        public BoundingBoxCorners GetCornersBox() {
+            BoundingBoxCorners corners;
+            var center = box3d.Center;
+            var axisX = box3d.AxisX;
+            var axisY = box3d.AxisY;
+            var axisZ = box3d.AxisZ;
+            var extends = box3d.Extent;
+
+            var A = center - extends.z * axisZ - extends.x * axisX - axisY * extends.y;
+            var B = center - extends.z * axisZ + extends.x * axisX - axisY * extends.y;
+            var C = center - extends.z * axisZ + extends.x * axisX + axisY * extends.y;
+            var D = center - extends.z * axisZ - extends.x * axisX + axisY * extends.y;
+
+            var E = center + extends.z * axisZ - extends.x * axisX - axisY * extends.y;
+            var F = center + extends.z * axisZ + extends.x * axisX - axisY * extends.y;
+            var G = center + extends.z * axisZ + extends.x * axisX + axisY * extends.y;
+            var H = center + extends.z * axisZ - extends.x * axisX + axisY * extends.y;
+
+
+            corners.NearBottomLeft = A.ToVector3();
+            corners.NearBottomRight = B.ToVector3();
+            corners.NearTopLeft = C.ToVector3();
+            corners.NearTopRight = D.ToVector3();
+
+            corners.FarBottomLeft = E.ToVector3();
+            corners.FarBottomRight = F.ToVector3();
+            corners.FarTopLeft = G.ToVector3();
+            corners.FarTopRight = H.ToVector3();
+
+            return corners;
+        }
     }
 }

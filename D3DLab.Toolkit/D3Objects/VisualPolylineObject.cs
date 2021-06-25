@@ -55,11 +55,9 @@ namespace D3DLab.Toolkit.D3Objects {
 
             return new VisualPolylineObject(tag);
         }
-        public static VisualPolylineObject CreateBox(IContextState context, ElementTag tag, AxisAlignedBox box, Vector4 color) {
+        public static VisualPolylineObject CreateBox(IContextState context, ElementTag tag, BoundingBoxCorners xbox, Vector4 color) {
             var indeces = new List<int>();
             var pos = new List<Vector3>();
-
-            var xbox = box.GetCornersBox();
 
             var NearBottomLeft = xbox.NearBottomLeft;
             var NearBottomRight = xbox.NearBottomRight;

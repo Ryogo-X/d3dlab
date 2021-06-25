@@ -10,6 +10,9 @@ namespace D3DLab.Toolkit.Math3D {
         public static Vector3f ToVector3f(this Vector3 v) {
             return new Vector3f(v.X, v.Y, v.Z);
         }
+         public static Vector3d ToVector3d(this Vector3 v) {
+            return new Vector3d(v.X, v.Y, v.Z);
+        }
         public static Vector3 ToVector3(this Vector3f v) {
             return new Vector3(v.x, v.y, v.z);
         }

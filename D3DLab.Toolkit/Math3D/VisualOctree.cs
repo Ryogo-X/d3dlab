@@ -258,7 +258,7 @@ namespace D3DLab.Toolkit.Math3D {
         public void Draw(IContextState context, List<VisualPolylineObject> drawed) {
             if (IsLeaf()) {
                 drawed.Add(VisualPolylineObject.CreateBox(context, ElementTag.New(),
-                    Bounds, V4Colors.Yellow));
+                    Bounds.GetCornersBox(), V4Colors.Yellow));
             } else {
                 var nodes = Nodes.ToArray();
                 for (int i = 0; i < nodes.Length; i++) {
@@ -267,7 +267,7 @@ namespace D3DLab.Toolkit.Math3D {
             }
             foreach (var i in items.ToList()) {
                 drawed.Add(VisualPolylineObject.CreateBox(context, ElementTag.New("DEBUG_BOX_"),
-                     i.Bound, V4Colors.Blue));
+                     i.Bound.GetCornersBox(), V4Colors.Blue));
             }
         }
 
