@@ -174,7 +174,7 @@ namespace D3DLab.Viewer.D3D {
         public void ShowBoundingBox(IContextState context, out AxisAlignedBox fullBox) {
             if (bounds != null) throw new Exception("Bounds has already showed.");
             fullBox = GetAllBounds(context);
-            bounds = VisualPolylineObject.CreateBox(context, ElementTag.New("Bounds_"), fullBox, V4Colors.White);
+            bounds = VisualPolylineObject.CreateBox(context, ElementTag.New("Bounds_"), fullBox.GetCornersBox(), V4Colors.White);
         }
 
         public AxisAlignedBox GetAllBounds(IContextState context) {

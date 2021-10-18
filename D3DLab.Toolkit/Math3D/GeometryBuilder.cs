@@ -457,7 +457,8 @@ namespace D3DLab.Toolkit.Math3D {
             var moveBoxCenterToStart = Matrix4x4.CreateTranslation(start);
             var moveCylStartToStart = Matrix4x4.CreateTranslation(axis * box.Center.Length());
 
-            geo = geo.Transform(moveToZero * rotate * moveBoxCenterToStart * moveCylStartToStart);
+            //geo = geo.Transform(moveToZero * rotate * moveBoxCenterToStart * moveCylStartToStart);
+            geo = geo.Transform(rotate * moveBoxCenterToStart);
 
             return geo;
         }
