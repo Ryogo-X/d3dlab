@@ -1,6 +1,10 @@
 ﻿using D3DLab.ECS;
 using D3DLab.ECS.Components;
+using D3DLab.Toolkit;
 using D3DLab.Toolkit.Components;
+
+using SharpDX.Direct3D9;
+
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -17,13 +21,17 @@ namespace D3DLab.Viewer.D3D.Systems {
             this.Tag = elementTag;
         }
         public void Dispose() {
-
+            // Method intentionally left empty.
         }
     }
-    class ZoomToAllObjectsSystem : BaseEntitySystem, IGraphicSystem, IGraphicSystemContextDependent {
+    public class ZoomToAllObjectsSystem : BaseEntitySystem, IGraphicSystem, IGraphicSystemContextDependent {
         public IContextState? ContextState { set; private get; }
 
         protected override void Executing(ISceneSnapshot snapshot) {
+            if (ContextState == null) {
+                throw new InvalidOperationException("ContextState can't be null");
+            }
+
             var emanager = ContextState.GetEntityManager();
 
             var world = emanager.GetEntity(snapshot.WorldTag);
@@ -34,31 +42,17 @@ namespace D3DLab.Viewer.D3D.Systems {
 
             var fullBox = new AxisAlignedBox();
             foreach (var entity in emanager.GetEntities()) {
-                if(entity.TryGetComponents<GeometryBoundsComponent, TransformComponent, RenderableComponent>
+                if (entity.TryGetComponents<GeometryBoundsComponent, TransformComponent, RenderableComponent>
                     (out var box, out var tr, out var renderable) && renderable.IsRenderable) {
                     fullBox = fullBox.Merge(box.Bounds.Transform(tr.MatrixWorld));
-                }                
+                }
             }
 
-            var surface = snapshot.Surface.Size;
-            var aspectRatio = surface.Width / surface.Height;
-
-            var size = fullBox.Size();
-
             var camera = ContextState.GetEntityManager().GetEntity(snapshot.CurrentCameraTag);
-            var com = OrthographicCameraComponent.Clone(camera.GetComponent<OrthographicCameraComponent>());
-
-            var move = Math.Max(Math.Abs(com.LookDirection.X * size.X),
-                Math.Max(Math.Abs(com.LookDirection.Y * size.Y), Math.Abs(com.LookDirection.Z * size.Z)));
-
-            com.Position = fullBox.Center + com.LookDirection * -move * 10;
-            com.RotatePoint = fullBox.Center;
-            com.Width = Math.Max(size.X, Math.Max(size.Y, size.Z)) * aspectRatio;
-            com.Scale = 1;
+            var com = CameraUtils.FocusCameraOnBox(camera.GetComponent<OrthographicCameraComponent>(),
+                      fullBox, snapshot.Surface.Size);
 
             camera.UpdateComponent(com);
-
-            
 
             world.RemoveComponent<ZoomToAllCompponent>();
         }

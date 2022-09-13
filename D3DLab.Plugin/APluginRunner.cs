@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace D3DLab.Plugin {
@@ -15,6 +16,16 @@ namespace D3DLab.Plugin {
     public interface IPluginViewModel {
         void Closed();
         void Init();
+    }
+
+    public class PluginComponent {
+        public PluginComponent(IPluginViewModel viewModel, UserControl view) {
+            ViewModel = viewModel;
+            View = view;
+        }
+
+        public IPluginViewModel ViewModel { get; }
+        public UserControl View { get; }
     }
 
     public abstract class APluginRunner : IPlugin {
@@ -33,8 +44,8 @@ namespace D3DLab.Plugin {
             return Task.CompletedTask;
         }
 
-        public Task ExecuteAsync(IPluginContext context) {
 
+        public virtual Task ExecuteAsWindowAsync(IPluginContext context) {
             var task = Task.CompletedTask;
             try {
                 win = CreateWindow();
@@ -49,6 +60,7 @@ namespace D3DLab.Plugin {
                     vm.Init();
                 }).Task;
             } catch (Exception ex) {
+                ex.ToString();
                 throw ex;
             }
 
@@ -57,5 +69,11 @@ namespace D3DLab.Plugin {
 
         protected abstract IPluginViewModel CreateViewModel(IPluginContext context);
         protected abstract IPluginWindow CreateWindow();
+
+        public virtual void LoadResources(IPluginContext context) {
+
+        }
+
+        public IPluginViewModel ExecuteAsComponent(IPluginContext context) => CreateViewModel(context);
     }
 }

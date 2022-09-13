@@ -8,8 +8,7 @@ namespace D3DLab.ECS.Ext {
         public static bool IsNotNull<T>(this T source) where T : class { return source != null; }
 
         public static T AsDo<T>(this object _source, Action<T> action) where T : class {
-            var source = _source as T;
-            if (source == null) {
+            if (_source is not T source) {
                 return null;
             }
 
@@ -62,6 +61,14 @@ namespace D3DLab.ECS.Ext {
             }
 
             return getter(source);
+        }
+
+
+        public static IEnumerable<TInput> DoIfAny<TInput>(this IEnumerable<TInput> source, Action<IEnumerable<TInput>> action) {
+            if (source.Any()) {
+                action(source);
+            }
+            return source;
         }
     }
 }

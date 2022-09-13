@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
 namespace D3DLab.Toolkit.D3Objects {
     public class MultiVisualObject : GameObject {
         /// <summary>
@@ -69,7 +71,17 @@ namespace D3DLab.Toolkit.D3Objects {
             }
             tags.Clear();
         }
+
+        public override void AddComponent<TComponent>(IContextState context, TComponent component) {
+            foreach (var tag in Tags) {
+                context
+                    .GetEntityManager()
+                    .GetEntity(tag)
+                    .AddComponent(component);
+            }
+        }
     }
+
     public class SingleVisualObject : GameObject {
         public ElementTag Tag { get; }
         /// <summary>
@@ -116,6 +128,13 @@ namespace D3DLab.Toolkit.D3Objects {
 
         public override void Cleanup(IContextState context) {
             context.GetEntityManager().RemoveEntity(Tag);
+        }
+
+        public override void AddComponent<TComponent>(IContextState context, TComponent component) {
+            context
+                .GetEntityManager()
+                .GetEntity(Tag)
+                .AddComponent(component);
         }
     }
 }

@@ -1,11 +1,12 @@
-﻿using D3DLab.Debugger;
+﻿using D3DLab.App.Shell.Plugin;
+using D3DLab.Debugger;
 using D3DLab.ECS;
 using D3DLab.Viewer.Infrastructure;
 using D3DLab.Viewer.Presentation;
 using D3DLab.Viewer.Presentation.FileDetails;
 using D3DLab.Viewer.Presentation.OpenFiles;
-using D3DLab.Viewer.Presentation.Plugin;
 using D3DLab.Viewer.Presentation.TopPanel.SaveAll;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using System.Linq;

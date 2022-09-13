@@ -74,8 +74,9 @@ namespace D3DLab.Toolkit.Systems {
         protected virtual OrthographicCameraComponent HandleZooming(ISceneSnapshot snapshot, OrthographicCameraComponent camera, CameraMovementComponent component) {
             var changed = OrthographicCameraComponent.Clone(camera);
             float delta = component.Delta;
-
-            var nscale = camera.Scale - (delta * component.SpeedValue);
+            //var nscale = camera.Scale - (delta * component.SpeedValue);
+            //move always by half of scale 
+            var nscale = changed.Scale - (camera.Scale * 0.5f * MathF.Sign(delta));
             if (nscale > 0) {
                 changed.Scale = nscale;
             }

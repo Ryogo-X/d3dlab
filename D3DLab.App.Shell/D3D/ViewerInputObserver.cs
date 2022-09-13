@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 
-namespace D3DLab.Viewer.D3D {
+namespace D3DLab.App.Shell.D3D {
     class ViewerInputObserver : RotateZoomPanInputObserver {
         readonly ICameraInputHandler inputHandler;
 

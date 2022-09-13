@@ -17,7 +17,7 @@ namespace D3DLab.SDX.Engine.Rendering {
        CameraState CameraState { get; }
     }
 
-    public interface IRenderTechnique<TProperties> : INestedSystem where TProperties : IRenderProperties {
+    public interface IRenderTechnique<TProperties> : INestedGraphicSystem where TProperties : IRenderProperties {
         IEnumerable<IRenderTechniquePass> GetPass();
         /// <summary>
         /// remove all entities from Technique

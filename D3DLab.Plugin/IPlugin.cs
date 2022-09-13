@@ -6,7 +6,9 @@ namespace D3DLab.Plugin
         string Name { get; }
         string Description { get; }
 
-        Task ExecuteAsync(IPluginContext context);
+        Task ExecuteAsWindowAsync(IPluginContext context);
+        IPluginViewModel ExecuteAsComponent(IPluginContext context);
         Task CloseAsync();
+        void LoadResources(IPluginContext context);
     }
 }

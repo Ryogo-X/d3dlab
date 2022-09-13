@@ -11,7 +11,11 @@ namespace D3DLab.ECS {
 
         public abstract void Hide(IContextState context);
         public abstract void Show(IContextState context);
-        public abstract void Cleanup(IContextState context);       
-        
+        public abstract void Cleanup(IContextState context);
+
+        public abstract void AddComponent<TComponent>(IContextState context, TComponent component)
+            where TComponent : IGraphicComponent;
+
+
     }
 }

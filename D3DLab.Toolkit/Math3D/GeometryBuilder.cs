@@ -419,25 +419,23 @@ namespace D3DLab.Toolkit.Math3D {
                         normals.Add((v3 - cc0).Normalized());
                     }
                     indices.Add(indx1);
-                    indices.Add(indx0);
                     indices.Add(indx2);
+                    indices.Add(indx0);
 
                     indices.Add(indx2);
-                    indices.Add(indx3);
                     indices.Add(indx1);
+                    indices.Add(indx3);
 
                     prevVb = vb;
                     prevVt = vt;
                 }
                 indices.Add(positions[prevCircle[0]]);
-                indices.Add(indx3);
                 indices.Add(indx2);
-
+                indices.Add(indx3);
 
                 indices.Add(positions[circle[0]]);
-                indices.Add(indx3);
                 indices.Add(positions[prevCircle[0]]);
-
+                indices.Add(indx3);
 
                 prevCircle = circle;
             }
@@ -450,15 +448,12 @@ namespace D3DLab.Toolkit.Math3D {
             if (cross == Vector3.Zero) {
                 cross = Vector3.UnitX;
             }
-            var angleRad = axis.AngleRad(Vector3.UnitZ);
+            cross.Normalize();
+            var angleRad = Vector3.UnitZ.AngleRad(axis);
+            var rotate = Matrix4x4.CreateFromAxisAngle(cross, -angleRad);
+            var moveToStart = Matrix4x4.CreateTranslation(start);
 
-            var moveToZero = Matrix4x4.CreateTranslation(-box.Center);
-            var rotate = Matrix4x4.CreateFromAxisAngle(cross, angleRad);
-            var moveBoxCenterToStart = Matrix4x4.CreateTranslation(start);
-            var moveCylStartToStart = Matrix4x4.CreateTranslation(axis * box.Center.Length());
-
-            //geo = geo.Transform(moveToZero * rotate * moveBoxCenterToStart * moveCylStartToStart);
-            geo = geo.Transform(rotate * moveBoxCenterToStart);
+            geo = geo.Transform(rotate * moveToStart);
 
             return geo;
         }

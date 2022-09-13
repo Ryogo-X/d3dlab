@@ -1,4 +1,5 @@
 ﻿using D3DLab.ECS.Ext;
+using D3DLab.Viewer.Presentation;
 
 using System;
 using System.Diagnostics;
@@ -224,7 +225,7 @@ namespace D3DLab.Viewer.Modules.Transform {
         }
     }
 
-    class TransformModuleViewModel : BaseNotify, IActionModule {
+    class TransformModuleViewModel : BaseNotify, IActionModule, ITabPanelContent {
         readonly ISelectedObjectTransformation selectedObject;
 
         public TransformTranslate Translate { get; }
@@ -316,6 +317,10 @@ namespace D3DLab.Viewer.Modules.Transform {
 
         public Vector3 GetObjectCenter() {
             return selectedObject.GetCenter();
+        }
+
+        public void Close() {
+            throw new NotImplementedException();
         }
     }
 }

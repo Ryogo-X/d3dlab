@@ -14,10 +14,10 @@ namespace D3DLab.FileFormats.GeoFormats._OBJ {
                         var point = curve[i];
                         writer.WriteLine(string.Format(CultureInfo.InvariantCulture, "v {0} {1} {2}", point.X, point.Y, point.Z));
                     }
-                    for (var i = 0; i < curve.Length - 1; i++) {
+                    for (var i = 0; i < curve.Length - 2; i++) {
                         writer.WriteLine(string.Format(CultureInfo.InvariantCulture, "l {0} {1}", i + 1, i + 2));
                     }
-                    writer.WriteLine(string.Format(CultureInfo.InvariantCulture, "l {0} {1}", curve.Length, 0));
+                    writer.WriteLine(string.Format(CultureInfo.InvariantCulture, "l {0} {1}", curve.Length - 1, 1));
                 }
             }
         }

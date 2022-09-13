@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using System.Windows;
+using D3DLab.App.Shell.D3D;
 
 namespace D3DLab.Viewer.Tests {
     class StensilTestScene : WFScene {

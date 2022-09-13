@@ -1,50 +1,36 @@
-﻿using D3DLab.Debugger;
+﻿using D3DLab.App.Shell.D3D;
+using D3DLab.App.Shell.Plugin;
+using D3DLab.App.Shell.TopPanel;
+using D3DLab.Debugger;
 using D3DLab.ECS;
 using D3DLab.ECS.Context;
+using D3DLab.ECS.Ext;
 using D3DLab.Plugin;
 using D3DLab.Toolkit;
 using D3DLab.Toolkit.Host;
 using D3DLab.Viewer.D3D;
 using D3DLab.Viewer.Infrastructure;
 using D3DLab.Viewer.Modules;
-using D3DLab.Viewer.Presentation.Componets;
-using D3DLab.Viewer.Presentation.FileDetails;
+using D3DLab.Viewer.Modules.Plugin;
 using D3DLab.Viewer.Presentation.LoadedPanel;
 using D3DLab.Viewer.Presentation.OpenFiles;
-using D3DLab.Viewer.Presentation.Plugin;
+using D3DLab.Viewer.Presentation.RightPanel;
 using D3DLab.Viewer.Presentation.TopPanel.SaveAll;
-
-using SharpDX.DXGI;
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Reflection;
-using System.Text;
 using System.Windows;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 
 using WPFLab;
 using WPFLab.MVVM;
 
 namespace D3DLab.Viewer.Presentation {
-    class GraphicsInfo : BaseNotify {
-        private double fps;
-        private double milliseconds;
-        private string? adapter;
-
-        public string? Adapter { get => adapter; set => Update(ref adapter, value); }
-        public double Fps { get => fps; set => Update(ref fps, value); }
-        public double Milliseconds { get => milliseconds; set => Update(ref milliseconds, value); }
-    }
-
     class AppOutput : BaseNotify, IAppLoggerSubscriber {
         public ObservableCollection<string> Text { get; private set; }
         const int maxLines = 10;
@@ -75,20 +61,18 @@ namespace D3DLab.Viewer.Presentation {
         void Write(string message) {
             Application.Current.Dispatcher.InvokeAsync(() => {
                 var now = DateTime.Now;
-                Text.Insert(0,$"[{now.Hour}:{now.Minute}:{now.Second}] {message}");
+                Text.Insert(0, $"[{now.Hour}:{now.Minute}:{now.Second}] {message}");
                 if (Text.Count > maxLines) {
-                    Text.RemoveAt(Text.Count-1);
+                    Text.RemoveAt(Text.Count - 1);
                 }
             });
         }
-        
+
     }
 
-    class MainWindowViewModel : BaseNotify, IDropFiles,
+    class MainWindowViewModel : BaseNotify, ITopPanelViewModel, IDropFiles,
         IFileLoader, ISelectedObjectTransformation, ISaveLoadedObject,
         IEntityRenderSubscriber, IPluginHandler {
-
-
 
         #region selected object cmd
 
@@ -108,16 +92,19 @@ namespace D3DLab.Viewer.Presentation {
         #endregion
 
         public ICommand OpenFilesCommand { get; }
-        public ICommand OpenDebuggerWindow { get; }
+        public ICommand OpenPluginsWindowCommand { get; }
         public ICommand HostLoadedCommand { get; }
         public ICommand SaveAllCommand { get; }
         public ICommand CameraFocusToAllCommand { get; }
-        public ICommand ShowWorldCoordinateSystemCommand { get; }
-        public ICommand ManipulatorToolEnabledCommand { get; }
+        public BaseWPFCommand<bool> ShowWorldCoordinateSystemCommand { get; }
+        public BaseWPFCommand<bool> ManipulatorToolEnabledCommand { get; }
+
+        public ICommand TabCloseCommand { get; }
 
         public ObservableCollection<LoadedObjectItem> LoadedObjects => loadedObjects;
+        public ObservableCollection<TabItemViewModel> RightTabs { get; }
+        public ObservableCollection<TabItemViewModel> LeftTabs { get; }
 
-        public IActionModule? Module { get => module; set => Update(ref module, value); }
         public GraphicsInfo GraphicsInfo { get; }
         public AppOutput Output { get; }
         public string WinTitle { get; }
@@ -132,9 +119,15 @@ namespace D3DLab.Viewer.Presentation {
         readonly AppLogger logger;
         readonly PluginProxy plugins;
 
-        IActionModule? module;
         WFScene? d3dScene;
 
+        #region modules
+
+        TabItemViewModel? transformModuleTab;
+
+        #endregion
+
+        PluginObservableCollection pluginLoadedObjects;
 
         public MainWindowViewModel(MainWindow mainWin, DebuggerPopup debugger,
             AppSettings settings, DialogManager dialogs, AppLogger logger) {
@@ -150,6 +143,7 @@ namespace D3DLab.Viewer.Presentation {
             GraphicsInfo = new GraphicsInfo();
             Output = new AppOutput();
             plugins = new PluginProxy(Path.Combine(AppContext.BaseDirectory, "plugins"));
+            pluginLoadedObjects = new PluginObservableCollection();
 
             logger.Subscrube(Output);
 
@@ -163,12 +157,13 @@ namespace D3DLab.Viewer.Presentation {
             WireframeSelectedObjectCommand = new WpfActionCommand<LoadedObjectItem>(OnWireframeSelectedObject);
             SelectedObjectSettingsOpenedCommand = new WpfActionCommand<LoadedObjectItem>(OnSelectedObjectSettingsOpened);
             SelectedObjectSettingsClosedCommand = new WpfActionCommand<LoadedObjectItem>(OnSelectedObjectSettingsClosed);
+            TabCloseCommand = new WpfActionCommand<TabItemViewModel>(OnClose);
 
             LockSelectedObjectCommand = null;
 
             OpenFilesCommand = new WpfActionCommand(OnOpenFilesCommand);
 
-            OpenDebuggerWindow = new WpfActionCommand(OnOpenDebuggerWindow);
+            OpenPluginsWindowCommand = new WpfActionCommand(OnOpenDebuggerWindow);
             HostLoadedCommand = new WpfActionCommand<FormsHost>(OnHostLoaded);
             SaveAllCommand = new WpfActionCommand(OnSaveAll);
             CameraFocusToAllCommand = new WpfActionCommand(OnCameraFocusToAll);
@@ -176,6 +171,8 @@ namespace D3DLab.Viewer.Presentation {
             ManipulatorToolEnabledCommand = new WpfActionCommand<bool>(OnManipulatorToolEnabled);
 
             loadedObjects = new ObservableCollection<LoadedObjectItem>();
+            RightTabs = new ObservableCollection<TabItemViewModel>();
+            LeftTabs = new ObservableCollection<TabItemViewModel>();
 
             notificator = new EngineNotificator();
 
@@ -190,22 +187,26 @@ namespace D3DLab.Viewer.Presentation {
             debugger.SetContext(context, notificator);
 
             plugins.Load();
-        }
 
+            RightTabs.AddGeneralTab();
+
+            //var obj = new Zirkonzahn.MetaData.Serialization.IO.ObjMetaReader();
+            //obj.ReadLinesAsync(
+            //    File.ReadAllLines(@"C:\Users\pavel.sverdlov\Downloads\2022-07-29_00001-012-upperjaw-bridge_upper_16-15-14-13-12-11-21-22-23-24-25-26 (3).obj", Encoding.UTF8)
+            //    .AsEnumerable().GetEnumerator());
+        }
 
 
         void OnHostLoaded(FormsHost host) {
             d3dScene = new WFScene(host, host.Overlay, context, notificator);
 
-           // d3dScene = new Tests.StensilTestScene(host, host.Overlay, context, notificator);
+            // d3dScene = new Tests.StensilTestScene(host, host.Overlay, context, notificator);
 
             d3dScene.Loaded += D3dScene_Loaded;
         }
-
         private void D3dScene_Loaded() {
             GraphicsInfo.Adapter = d3dScene.GetAdapterDescription().Description;
         }
-
         public override void OnUnloaded() {
             foreach (var plugin in plugins.Plugins) {
                 plugin.Plugin.CloseAsync().Wait();
@@ -245,6 +246,7 @@ namespace D3DLab.Viewer.Presentation {
         void OnRemoveSelectedObject(LoadedObjectItem item) {
             item.Visual.Cleanup(context);
             loadedObjects.Remove(item);
+            pluginLoadedObjects.Remove(item.ToPluginObject());
         }
         void OnOpenDetailsSelectedObject(LoadedObjectItem item) {
             dialogs.ObjDetails.Open(vm => {
@@ -299,9 +301,14 @@ namespace D3DLab.Viewer.Presentation {
         }
         void OnManipulatorToolEnabled(bool _checked) {
             if (_checked) {
-                Module = new Modules.Transform.TransformModuleViewModel(this);
+                transformModuleTab = new TabItemViewModel(
+                    "Transform",
+                    new Modules.Transform.TransformModuleViewModel(this));
+                transformModuleTab.IsSelected = true;
+                LeftTabs.Add(transformModuleTab);
             } else {
-                Module = null;
+                LeftTabs.Remove(transformModuleTab);
+                transformModuleTab = null;
             }
         }
 
@@ -310,7 +317,10 @@ namespace D3DLab.Viewer.Presentation {
             foreach (var file in files) {
                 try {
                     var loaded = loader.ImportFromFiles(file, d3dScene);
-                    loadedObjects.Add(new LoadedObjectItem(loaded, new FileInfo(file)));
+                    var item = new LoadedObjectItem(loaded, new FileInfo(file));
+
+                    loadedObjects.Add(item);
+                    pluginLoadedObjects.Add(item.ToPluginObject());
                 } catch (Exception ex) {
                     logger.Error(ex);
                 }
@@ -374,7 +384,10 @@ namespace D3DLab.Viewer.Presentation {
             return any == null ? Vector3.Zero : any.Visual.GetAllBounds(context).Center;
         }
         void ISelectedObjectTransformation.Finish() {
-            Module = null;
+            transformModuleTab.Do(x => {
+                LeftTabs.Remove(transformModuleTab);
+                transformModuleTab = null;
+            });
         }
 
         void IEntityRenderSubscriber.Render(IEnumerable<GraphicEntity> entities) {
@@ -402,18 +415,44 @@ namespace D3DLab.Viewer.Presentation {
         }
 
         void IPluginHandler.Handle(LoadedPlugin pl) {
-           var objs = new List<IPluginLoadedObjectDetails>();
+            var objs = new List<IPluginLoadedObjectDetails>();
 
-            foreach(var o in loadedObjects) {
-                objs.Add(new Modules.Plugin.PluginLoadedObjectDetails(
-                    o.File, 
-                    o.Visual.Tags));
+            var plctx = new PluginContext(new PluginScene(context), pl.File.Directory, pluginLoadedObjects);
+
+            if (!pl.IsResourcesLoaded) {
+                try {
+                    pl.Plugin.LoadResources(plctx);
+                    pl.IsResourcesLoaded = true;
+                } catch (Exception ex) {
+                    logger.Error(ex);
+                }
             }
 
-            pl.Plugin
-                .ExecuteAsync(new Modules.Plugin.PluginContext(new Modules.Plugin.PluginScene(context), mainWin, pl.File.Directory, objs));
+            var vm = pl.Plugin.ExecuteAsComponent(plctx);
+
+            LeftTabs.Add(new TabItemViewModel(pl.Plugin.Name,
+                new TabPanelPluginContent(vm)));
+
+            mainWin.Dispatcher.InvokeAsync(() => {
+                vm.Init();
+            });
+
+            //pl.Plugin
+            //    .ExecuteAsWindowAsync(plctx);
 
             dialogs.Plugins.Close();
         }
+
+
+        #region tab handlers
+
+        void OnClose(TabItemViewModel tab) {
+            if (LeftTabs.Contains(tab)) {
+                tab.Close();
+                LeftTabs.Remove(tab);
+            }
+        }
+
+        #endregion
     }
 }

@@ -3,6 +3,7 @@ using D3DLab.ECS.Common;
 using D3DLab.ECS.Ext;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using System.Text;
 
@@ -64,6 +65,7 @@ namespace D3DLab.ECS.Components {
 
     [Obsolete("Remake")]
     public class OrthographicCameraComponent : GeneralCameraComponent {
+        
         public static OrthographicCameraComponent Clone(OrthographicCameraComponent com) {
             var copied = new OrthographicCameraComponent(new SurfaceSize(com.Width, com.prevScreenHeight));
             copied.Copy(com);

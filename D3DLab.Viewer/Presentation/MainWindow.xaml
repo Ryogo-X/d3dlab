@@ -8,6 +8,10 @@
         xmlns:host="clr-namespace:D3DLab.Toolkit.Host;assembly=D3DLab.Toolkit" 
         xmlns:transform="clr-namespace:D3DLab.Viewer.Modules.Transform"
         xmlns:comp="clr-namespace:D3DLab.Viewer.Presentation.Componets"
+        xmlns:pres="clr-namespace:D3DLab.Viewer.Presentation"
+        xmlns:rightTabs="clr-namespace:D3DLab.Viewer.Presentation.RightPanel"
+        
+        xmlns:toppanel="clr-namespace:D3DLab.App.Shell.TopPanel;assembly=D3DLab.App.Shell"
         mc:Ignorable="d"  AllowDrop="True"
         x:Name="mainwin"
         Title="{Binding WinTitle}" Height="450" Width="1000" 
@@ -27,7 +31,17 @@
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type comp:CullModesComponentViewModel}">
                         <comp:CullModesComponentView/>
-                    </DataTemplate>                    
+                    </DataTemplate>
+                    <!--right panel-->
+                    <DataTemplate DataType="{x:Type rightTabs:GeneralTabContentViewModel}">
+                        <rightTabs:GenneralTabView/>
+                    </DataTemplate>
+                    
+                    <!--left panel-->
+                    <DataTemplate DataType="{x:Type pres:TabPanelPluginContent}">
+                        <ContentPresenter Content="{Binding PluginViewModel}" />
+                    </DataTemplate>
+
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -50,150 +64,21 @@
         </Grid.ColumnDefinitions>
 
         <!-- TOP -->
-        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5"  BorderThickness="0,0,0,2"
-                         BorderBrush="{StaticResource BorderBrushColor}" HorizontalAlignment="Stretch">
-            <Grid Height="50" >
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
+        <toppanel:TopPanelView Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" DataContext="{Binding}"/>
+        
 
-                <DockPanel x:Name="LeftDock" HorizontalAlignment="Left" Grid.Column="0">
-                    <Button Margin="5,5,5,5" Style="{StaticResource ImageButton}"
-                            Content="{StaticResource NormalFolderIconCanvas}"
-                            Command="{Binding OpenFilesCommand}"/>
-                    
-                    <Button Style="{StaticResource ImageButton}" Margin="0,5,0,5" 
-                            ToolTip="Focus camera on visible objects"
-                            Command="{Binding CameraFocusToAllCommand}">
-                        <Grid>
-                            <!--<Canvas Width="40" Margin="5,2,0,0">
-                                <Canvas.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
-                                    </TransformGroup>
-                                </Canvas.RenderTransform>
-                                <Path Fill="White" Data="M15.54 5.54L13.77 7.3 12 5.54 10.23 7.3 8.46 5.54 12 2zm2.92 10l-1.76-1.77L18.46 12l-1.76-1.77 1.76-1.77L22 12zm-10 2.92l1.77-1.76L12 18.46l1.77-1.76 1.77 1.76L12 22zm-2.92-10l1.76 1.77L5.54 12l1.76 1.77-1.76 1.77L2 12z"/>
-                                <Ellipse Fill="{StaticResource AlarmColor}" Height="6" Width="6" Canvas.Top="9" Canvas.Left="9" />
-                            </Canvas>-->
-                            <Canvas Width="45">
-                                <Canvas.RenderTransform>
-                                    <TransformGroup>
-                                        <TranslateTransform X="2" Y="0"/>
-                                        <ScaleTransform ScaleX="1.6" ScaleY="1.6" />
-                                    </TransformGroup>
-                                </Canvas.RenderTransform>
-                                <Path Fill="{StaticResource BorderBrushColor}" 
-                                      Data="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm-7 7H3v4c0 1.1.9 2 2 2h4v-2H5v-4zM5 5h4V3H5c-1.1 0-2 .9-2 2v4h2V5zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2zm0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4z"/>
-                                <Ellipse Fill="{StaticResource AlarmColor}" Height="8" Width="8" Canvas.Top="8" Canvas.Left="8" />
-                            </Canvas>
-                        </Grid>
-                    </Button>
-
-                    <ToggleButton Margin="5,5,5,5" x:Name="ShowWorldCoordinateSystemToggleButton"
-                            ToolTip="Show World coordinate system"
-                            Style="{StaticResource ImageToggleButton}"
-                            Command="{Binding ShowWorldCoordinateSystemCommand}"
-                            CommandParameter="{Binding IsChecked, ElementName=ShowWorldCoordinateSystemToggleButton}"
-                            Content="{StaticResource NormalCoorAxisIconCanvas}"/>
-
-                    <ToggleButton Style="{StaticResource ImageToggleButton}" Margin="0,5,0,5" x:Name="ManipulatorToolToggleButton"
-                            Command="{Binding ManipulatorToolEnabledCommand}"
-                            CommandParameter="{Binding IsChecked, ElementName=ManipulatorToolToggleButton}"
-                            ToolTip="Manipulator Tool"      
-                             >
-                        <Canvas Width="45">
-                            <Canvas.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="0.09" ScaleY="0.09" />
-                                    <TranslateTransform X="7" Y="3"/>
-                                </TransformGroup>
-                            </Canvas.RenderTransform>
-                            <Path Fill="White" Data="M54.907,111.698c8.974,0,18.103-2.202,26.654-6.402l64.973,64.967l31.714-31.72l-64.961-64.961
-		c10.591-21.493,8.031-45.181-6.886-60.098C92.839-0.085,70.475-3.463,50.247,4.861l-8.282,3.407l22.972,22.972l-5.436,20.281
-		L39.22,56.958L16.248,33.986l-3.407,8.282c-8.545,20.777-5.239,42.293,8.622,56.154C30.031,106.978,41.905,111.698,54.907,111.698z"/>
-                            <Path Fill="White" Data="M322.348,231.006c-8.568-8.562-20.437-13.276-33.438-13.276c-8.974,0-18.098,2.202-26.654,6.396
-		l-64.967-64.961l-31.714,31.72l64.961,64.961c-10.591,21.499-8.031,45.181,6.88,60.098c8.551,8.551,20.407,13.258,33.397,13.258
-		c7.62,0,15.275-1.563,22.752-4.636l8.276-3.407l-22.966-22.966l5.436-20.275l20.281-5.442l22.966,22.978l3.407-8.282
-		C339.521,266.395,336.215,244.879,322.348,231.006z"/>
-                            <Path Fill="White" Data="M254.893,89.09l8.145,8.145L315.266,45l-25.622-25.616l-52.228,52.228l9.04,9.04L95.559,231.543
-		l-7.053-7.047L0,313.014l22.304,22.292l88.513-88.513l-6.814-6.814L254.893,89.09z"/>
-                        </Canvas>
-                    </ToggleButton>
-                    
-                    <Button Style="{StaticResource ImageButton}" Margin="0,5,0,5" Command="{Binding MoveToCenterWorld}"
-                             Visibility="Collapsed">
-                        <Canvas Width="40" Margin="5,2,0,0">
-                            <Canvas.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
-                                </TransformGroup>
-                            </Canvas.RenderTransform>
-                            <Path Fill="White" Data="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"/>
-                            <Path Data="M0 0h24v24H0z" />
-                        </Canvas>
-                    </Button>
-                    <Button Style="{StaticResource ImageButton}" Margin="5,5,0,5" Command="{Binding ShowAxis}"
-                             Visibility="Collapsed">
-                        <Grid>
-                            <Canvas Width="40" Margin="5,2,0,0">
-                                <Canvas.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
-                                    </TransformGroup>
-                                </Canvas.RenderTransform>
-                                <Path Fill="White" Data="M17 20.41L18.41 19 15 15.59 13.59 17 17 20.41zM7.5 8H11v5.59L5.59 19 7 20.41l6-6V8h3.5L12 3.5 7.5 8z"/>
-                            </Canvas>
-                        </Grid>
-                    </Button>
-                    
-                </DockPanel>
-                <DockPanel x:Name="RightDock" HorizontalAlignment="Right" Grid.Column="1" >
-                    <Button Style="{StaticResource ImageButton}" Margin="5" 
-                            Content="{StaticResource NormalSaveIconCanvas}"
-                            Command="{Binding SaveAllCommand}"
-                            CommandParameter="{Binding}"/>
-                    <Rectangle Fill="{StaticResource BorderBrushColor}" Width="2" Margin="0,5,0,5"/>
-                    <Button Style="{StaticResource ImageButton}" Margin="5"
-                        Command="{Binding OpenDebuggerWindow}">
-                        <Grid>
-                            <Canvas Width="40" Margin="5,2,0,0">
-                                <Canvas.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="1.4" ScaleY="1.4" />
-                                    </TransformGroup>
-                                </Canvas.RenderTransform>
-                                <Path Fill="White" Data="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"/>
-                            </Canvas>
-                        </Grid>
-                    </Button>
-                    <Border BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="1" Margin="0,5,5,5"
-                            Padding="5"
-                            Width="190" DockPanel.Dock="Right">
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock FontSize="10" TextTrimming="CharacterEllipsis">
-                                <Run Text="{Binding GraphicsInfo.Adapter}" />
-                            </TextBlock>
-                            <TextBlock FontSize="10" HorizontalAlignment="Right">
-                                <Run Text="{Binding GraphicsInfo.Milliseconds}"/>
-                                <Run Text="ms"/>
-                                <Run Text="/"/>
-                                <Run Text="{Binding GraphicsInfo.Fps}"/>
-                                <Run Text="fps"/>
-                            </TextBlock>
-                        </StackPanel>
-                    </Border>
-                </DockPanel>
-                
-            </Grid>
-        </Border>
-
-
-        <ContentPresenter Content="{Binding Module}" Grid.Column="0" Grid.Row="1" Grid.RowSpan="4" />
+        <TabControl Grid.Column="0" Grid.Row="1" Grid.RowSpan="4"
+                    ItemsSource="{Binding LeftTabs}" IsSynchronizedWithCurrentItem="True" SelectedIndex="0">
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <ContentPresenter Content="{Binding Content}"/>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
 
         <GridSplitter Grid.Column="1" Grid.Row="1" Grid.RowSpan="4" IsEnabled="False"
                       ShowsPreview="False" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
-        
+
         <!--Overlay="{Binding ElementName=scene}"-->
         <Grid x:Name="overlay" Grid.Row="1" Grid.Column="2">
             <host:FormsHost x:Name="formhost"
@@ -201,129 +86,18 @@
                             HostLoaded="{Binding HostLoadedCommand}">
             </host:FormsHost>
         </Grid>
-        
+
         <GridSplitter Grid.Column="3" Grid.Row="1" Grid.RowSpan="4"
                       ShowsPreview="False" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
-        <ItemsControl Grid.Row="1" Grid.Column="4" Grid.RowSpan="5" ItemsSource="{Binding LoadedObjects}"
-                 >
-            <ItemsControl.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Remove" 
-                              Command="{Binding RemoveSelectedObjectCommand}" 
-                              CommandParameter="{Binding}"
-                                          />
-                </ContextMenu>
-            </ItemsControl.ContextMenu>
-            <ItemsControl.ItemTemplate>
+        <TabControl Grid.Row="1" Grid.Column="4" Grid.RowSpan="5" 
+                    ItemsSource="{Binding RightTabs}" IsSynchronizedWithCurrentItem="True" SelectedIndex="0">
+            <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <Expander Margin="0,0,5,0">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="Expanded">
-                                <i:InvokeCommandAction 
-                                    Command="{Binding DataContext.SelectedObjectSettingsOpenedCommand, ElementName=mainwin}"
-                                    CommandParameter="{Binding}"/>
-                            </i:EventTrigger>
-                            <i:EventTrigger EventName="Collapsed">
-                                <i:InvokeCommandAction 
-                                    Command="{Binding DataContext.SelectedObjectSettingsClosedCommand, ElementName=mainwin}"
-                                    CommandParameter="{Binding}"/>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <Expander.Header>
-                            <DockPanel>
-                                <ToggleButton Style="{StaticResource ImageToggleButton}" Margin="0,0,5,0" 
-                                              Content="{StaticResource SmallShowHideIconCanvas}"
-                                              IsChecked="{Binding IsVisible}"
-                                              Command="{Binding DataContext.ShowHideSelectedObjectCommand, ElementName=mainwin}"
-                                              CommandParameter="{Binding}"
-                                              ToolTip="Show/Hide"/>
-                                <TextBlock Text="{Binding Name}" Width="125" TextTrimming="CharacterEllipsis"/>                                
-                                <Button Style="{StaticResource ImageButton}" Margin="5,0,0,0" 
-                                        Content="{StaticResource SmallRefreshIconCanvas}"
-                                        Command="{Binding DataContext.RefreshSelectedObjectCommand, ElementName=mainwin}"
-                                        CommandParameter="{Binding}"
-                                        ToolTip="Refresh from file"/>
-                                <ToggleButton Style="{StaticResource ImageToggleButton}" Margin="5,0"
-                                              Content="{StaticResource SmallLockIconCanvas}"
-                                              Command="{Binding DataContext.LockSelectedObjectCommand, ElementName=mainwin}"
-                                              CommandParameter="{Binding}"
-                                              ToolTip="Lock"/>
-                                <Button Style="{StaticResource ImageButton}" Margin="0,0" 
-                                        Content="{StaticResource SmallRemoveIconCanvas}"
-                                        Command="{Binding DataContext.RemoveSelectedObjectCommand, ElementName=mainwin}"
-                                        CommandParameter="{Binding}"
-                                        ToolTip="Remove"/>
-                            </DockPanel>
-                        </Expander.Header>
-                        <Expander.Content>
-                            <StackPanel Margin="5,5,0,0" Orientation="Vertical">
-                                <TextBlock Text="{Binding Name}" DockPanel.Dock="Left" Margin="0,0,0,5" TextWrapping="Wrap">
-                                    <!--<TextBlock.InputBindings>
-                                        <MouseBinding MouseAction="LeftDoubleClick"
-                                  Command="{Binding DataContext.OpenDetailsSelectedObjectCommand, RelativeSource={RelativeSource AncestorType={x:Type ListBox}}}"
-                                  CommandParameter="{Binding}" />
-                                    </TextBlock.InputBindings>-->
-                                </TextBlock>
-                                <TextBlock Text="Geometry"/>
-                                <TextBlock Foreground="LightGray">
-                                    <Run Text="Vertices:"/>
-                                    <Run Text="{Binding Details.VertexCount}"/>
-                                    <Run Text="     "/>
-                                    <Run Text="Triangles:"/>
-                                    <Run Text="{Binding Details.TriangleCount}"/>
-                                </TextBlock>
-
-                                <ItemsControl ItemsSource="{Binding ActiveComponents}" Margin="0,5,0,0">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border BorderBrush="{StaticResource BorderBrushColor}" BorderThickness="0,1,0,0">
-                                                <ContentPresenter Content="{Binding}"/>
-                                            </Border>                                            
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                                <DockPanel HorizontalAlignment="Left" Margin="0,5,0,0">
-
-                                    <ToggleButton Style="{StaticResource ImageToggleButton}" Margin="0,0" 
-                                            Content="{StaticResource SmallLineBoxIconCanvas}" IsChecked="{Binding IsBoundsShowed}"
-                                            Command="{Binding DataContext.ShowBoundsSelectedObjectCommand, ElementName=mainwin}"
-                                            CommandParameter="{Binding}"
-                                            ToolTip="Show Bounding box"/>
-                                    <ToggleButton Style="{StaticResource ImageToggleButton}" Margin="5,0,0,0" 
-                                            Content="{StaticResource SmallFlatshadingIconCanvas}" 
-                                            IsChecked="{Binding IsFlatshadingEnabled}"
-                                            Command="{Binding DataContext.FlatshadingSelectedObjectCommand, ElementName=mainwin}"
-                                            CommandParameter="{Binding}"
-                                            ToolTip="Flatshading"/>
-                                    <ToggleButton Style="{StaticResource ImageToggleButton}" Margin="5,0,0,0" 
-                                            Content="{StaticResource SmallWireframeIconCanvas}" 
-                                            IsChecked="{Binding IsWireframeEnabled}"
-                                            Command="{Binding DataContext.WireframeSelectedObjectCommand, ElementName=mainwin}"
-                                            CommandParameter="{Binding}"
-                                            ToolTip="Wireframe"/>
-
-                                    
-
-                                    <Button Style="{StaticResource ImageButton}" Margin="5,0" 
-                                            Content="{StaticResource SmallFolderIconCanvas}"
-                                            Command="{Binding DataContext.OpenFolderSelectedObjectCommand, ElementName=mainwin}"
-                                            CommandParameter="{Binding}"
-                                            ToolTip="Open file folder"/>
-                                    <Button Style="{StaticResource ImageButton}" Margin="0,0" 
-                                            Content="{StaticResource SmallSettingsIconCanvas}"
-                                            Command="{Binding DataContext.OpenDetailsSelectedObjectCommand, ElementName=mainwin}"
-                                            CommandParameter="{Binding}"
-                                            ToolTip="Open file format details"/>
-                                </DockPanel>
-                            </StackPanel>
-                        </Expander.Content>
-                    </Expander>
-
+                    <ContentPresenter Content="{Binding Content}" />
                 </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            </TabControl.ContentTemplate>            
+        </TabControl>
 
         <!--Buttom-->
         <GridSplitter Grid.Column="2" Grid.Row="2" ShowsPreview="False" Height="3"
@@ -336,7 +110,7 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-        
+
     </Grid>
 
 </Window>

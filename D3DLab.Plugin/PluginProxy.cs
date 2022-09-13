@@ -27,9 +27,12 @@ namespace D3DLab.Plugin {
                 if (File.Exists(pluginDll) && pluginDll.EndsWith("Plugin.dll")) {
                     try {
                         var loader = PluginLoader.CreateFromAssemblyFile(
-                            pluginDll,
-                            sharedTypes: new[] { type },
-                            config => config.DefaultContext = AssemblyLoadContext.Default);
+                            assemblyFile: pluginDll,
+                            isUnloadable: false,
+                            sharedTypes: new Type[] {
+                               // type 
+                            },
+                            configure: config => config.DefaultContext = AssemblyLoadContext.Default);
 
                         var types = loader.LoadDefaultAssembly().GetTypes();
 
@@ -38,7 +41,9 @@ namespace D3DLab.Plugin {
                                 Plugins.Add(new LoadedPlugin(plugin, new FileInfo(pluginDll)));
                             }
                         }
-                    } catch {
+
+                        loader.Dispose();
+                    } catch (Exception ex){
                         //ignore 
                     }
                 }

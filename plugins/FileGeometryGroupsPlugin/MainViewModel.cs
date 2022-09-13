@@ -126,6 +126,9 @@ namespace FileGeometryGroupsPlugin {
             items = new ObservableCollection<ObjGroupViewItem>();
             ObjGroups = CollectionViewSource.GetDefaultView(items);
             listView = (ListCollectionView)ObjGroups;
+
+            pluginContext.Collection.Removed += OnRemoved;
+            pluginContext.Collection.Added += OnAdded;
         }
 
         void Files_CurrentChanged(object sender, EventArgs e) {
@@ -159,6 +162,23 @@ namespace FileGeometryGroupsPlugin {
             //Refresh();
             ObjGroups.Refresh();
         }
+        void OnAdded(IPluginLoadedObjectDetails obj) {
+            files.Add(new FileViewModel(obj));
+        }
+        void OnRemoved(IPluginLoadedObjectDetails obj) {
+            var toremove = files.Single(x => x.Details == obj);
+            var current = Files.CurrentItem as FileViewModel;
+            if (current != null && toremove == current) {
+                items.Clear();
+
+                Files.MoveCurrentTo(null);
+
+                ObjGroups.Refresh();
+            }
+
+            files.Remove(toremove);
+        }
+
         static bool TryGetMesh(IContextState context, in ElementTag tag, out GeometryStructures<IFileGeometry3D> structures) {
             var id = context.GetComponentManager().GetComponent<GeometryPoolComponent>(tag);
             structures = context.GetGeometryPool().GetGeometry<IGeometryData>(id) as GeometryStructures<IFileGeometry3D>;
@@ -167,14 +187,17 @@ namespace FileGeometryGroupsPlugin {
 
 
         public void Init() {
-            foreach (var f in pluginContext.Objects) {
+            foreach (var f in pluginContext.Collection) {
                 var filevm = new FileViewModel(f);
                 files.Add(filevm);
             }
         }
 
         public void Closed() {
-           ShowHideAll(true);
+            pluginContext.Collection.Removed -= OnRemoved;
+            pluginContext.Collection.Added -= OnAdded;
+
+            ShowHideAll(true);
         }
 
         internal void ShowHideAll(bool show) {

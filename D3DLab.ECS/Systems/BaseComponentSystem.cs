@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Text;
 
 namespace D3DLab.ECS {
-    public abstract class BaseEntitySystem : IComponentSystemIncrementId {
+    public abstract class BaseEntitySystem : IComponentSystemIncrementId, IDisposable {
         public int ID { get; set; }
         public TimeSpan ExecutionTime { get; private set; }
 
@@ -33,10 +33,10 @@ namespace D3DLab.ECS {
 
         }
     }
-    public interface INestedSystem {
+    public interface INestedGraphicSystem {
         int OrderId { get; set; }
     }
-    public abstract class ContainerSystem<TNestedSystem> : BaseEntitySystem where TNestedSystem : INestedSystem {
+    public abstract class ContainerSystem<TNestedSystem> : BaseEntitySystem where TNestedSystem : INestedGraphicSystem {
         readonly SynchronizationContext<ContainerSystem<TNestedSystem>, TNestedSystem> synchronization;
         protected readonly List<TNestedSystem> nested;
 

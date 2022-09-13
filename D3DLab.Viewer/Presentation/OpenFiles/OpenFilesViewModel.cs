@@ -80,6 +80,7 @@ namespace D3DLab.Viewer.Presentation.OpenFiles {
                 RecentFilesEnabled = true;
             }
             RefreshRecentFiles();
+            OnClose();
         }
 
         void OnClose() {

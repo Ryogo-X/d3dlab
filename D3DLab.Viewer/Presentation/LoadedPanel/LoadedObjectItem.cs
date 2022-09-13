@@ -17,6 +17,7 @@ namespace D3DLab.Viewer.Presentation.LoadedPanel {
         void TurnTransparentWireframeOff();
     }
     class LoadedObjectItem : BaseNotify {
+        public Guid ID { get; }
         public string Name => Visual.Description;
         public LoadedObjectDetails Details => Visual.Details;
         public bool IsVisible { get; set; }
@@ -34,6 +35,7 @@ namespace D3DLab.Viewer.Presentation.LoadedPanel {
         CullModesComponentViewModel? cullComponent;
 
         public LoadedObjectItem(LoadedVisualObject loaded, FileInfo file) {
+            ID = Guid.NewGuid();
             this.Visual = loaded;
             File = file;
             IsVisible = true;

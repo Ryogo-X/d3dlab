@@ -10,5 +10,7 @@ namespace D3DLab.Plugin
 
         public IPlugin Plugin { get; }
         public FileInfo File { get; }
+
+        public bool IsResourcesLoaded { get; set; }
     }
 }

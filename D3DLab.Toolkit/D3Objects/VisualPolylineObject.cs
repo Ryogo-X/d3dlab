@@ -33,6 +33,7 @@ namespace D3DLab.Toolkit.D3Objects {
             manager
                .CreateEntity(tag)
                .AddComponent(geo)
+               .AddComponent(GeometryBoundsComponent.Create(pos))
                .AddComponent(TransformComponent.Identity())
                .AddComponent(ColorComponent.CreateDiffuse(color))
                .AddComponent(isVisible ? RenderableComponent.AsLineList() : RenderableComponent.AsLineList().Disable());
@@ -50,6 +51,7 @@ namespace D3DLab.Toolkit.D3Objects {
             manager
                .CreateEntity(tag)
                .AddComponent(geo)
+               .AddComponent(GeometryBoundsComponent.Create(points))
                .AddComponent(TransformComponent.Identity())
                .AddComponent(isVisible ? RenderableComponent.AsLineList() : RenderableComponent.AsLineList().Disable());
 
@@ -117,6 +119,7 @@ namespace D3DLab.Toolkit.D3Objects {
             manager
                .CreateEntity(tag)
                .AddComponent(geo)
+               .AddComponent(GeometryBoundsComponent.Create(pos))
                .AddComponent(TransformComponent.Identity())
                .AddComponent(ColorComponent.CreateDiffuse(color))
                .AddComponent(RenderableComponent.AsLineList());

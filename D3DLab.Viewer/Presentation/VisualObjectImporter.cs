@@ -1,4 +1,4 @@
-﻿using D3DLab.ECS;
+﻿using D3DLab.App.Shell.D3D;
 using D3DLab.FileFormats.GeoFormats;
 using D3DLab.FileFormats.GeoFormats._OBJ;
 using D3DLab.Toolkit.Math3D;
@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace D3DLab.Viewer.Presentation {
     class VisualObjectImporter {

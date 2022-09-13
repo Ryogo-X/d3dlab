@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\wpflab\WPFLab\WPFLab\WPFLab.csproj" />
+    <ProjectReference Include="..\D3DLab.App.Shell\D3DLab.App.Shell.csproj" />
+    <ProjectReference Include="..\D3DLab.ECS\D3DLab.ECS.csproj" />
+    <ProjectReference Include="..\D3DLab.Plugin\D3DLab.Plugin.csproj" />
+    <ProjectReference Include="..\D3DLab.SDX.Engine\D3DLab.SDX.Engine.csproj" />
+    <ProjectReference Include="..\D3DLab.Toolkit\D3DLab.Toolkit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="plugins\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="plugins\LifeSim.Particles.Plugin.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

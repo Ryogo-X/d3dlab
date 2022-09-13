@@ -6,7 +6,7 @@
     <wpflab:LabApplication.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-               <ResourceDictionary Source="Resources\Styles.xaml"/>               
+                <ResourceDictionary Source="/D3DLab.App.Shell;component/Resources\Styles.xaml"/>               
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </wpflab:LabApplication.Resources>
