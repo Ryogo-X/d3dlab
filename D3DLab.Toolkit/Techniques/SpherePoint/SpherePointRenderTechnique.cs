@@ -1,5 +1,6 @@
 ﻿using D3DLab.ECS;
 using D3DLab.ECS.Common;
+using D3DLab.ECS.Components;
 using D3DLab.ECS.Ext;
 using D3DLab.ECS.Shaders;
 using D3DLab.SDX.Engine;

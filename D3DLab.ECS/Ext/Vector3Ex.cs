@@ -17,6 +17,10 @@ namespace D3DLab.ECS.Ext {
         }
     }
     public static class Vector3Ex {
+
+        public static Vector3 Add(this Vector3 v1, float x, float y, float z) 
+            => new(v1.X + x, v1.Y + y, v1.Z + z);
+
         public static void Normalize(ref this Vector3 v) {
             var n = Vector3.Normalize(v);
             v.X = n.X;

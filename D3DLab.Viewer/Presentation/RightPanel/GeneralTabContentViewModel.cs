@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using D3DLab.App.Shell.Tabs;
+
 using WPFLab.MVVM;
 
 namespace D3DLab.Viewer.Presentation.RightPanel {

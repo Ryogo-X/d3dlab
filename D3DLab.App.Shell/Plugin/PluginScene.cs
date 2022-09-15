@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 
+using D3DLab.App.Shell.D3D;
 using D3DLab.App.Shell.D3D.Systems;
 using D3DLab.ECS;
 using D3DLab.Plugin;
@@ -9,18 +10,34 @@ using D3DLab.Toolkit.Math3D;
 
 namespace D3DLab.App.Shell.Plugin {
     public class PluginScene : IPluginScene {
+        readonly WFScene scene;
+
         public IContextState Context { get; }
 
-        public PluginScene(IContextState context) {
+        public PluginScene(IContextState context, WFScene scene) {
             Context = context;
+            this.scene = scene;
         }
-        public GameObject DrawPoint(string key, Vector3 center, Vector4 color) {
+
+        public void SetContinuouslyRender(bool enable) {
+            scene.Engine.IsContinuouslyRender = enable;
+        }
+
+        public GameObject DrawPoint(string key, PointDetails details) {
             return VisualSphereObject.Create(Context, ElementTag.New($"{key}_Point"), new VisualSphereObject.Data {
-                Center = center,
-                Color = color,
-                Radius = .1f
+                Center = details.Center,
+                Color = details.Color,
+                Radius = details.Radius
             });
         }
+        public GameObject DrawPoint(ElementTag tag, PointDetails details) {
+            return VisualSphereObject.Create(Context, tag, new VisualSphereObject.Data {
+                Center = details.Center,
+                Color = details.Color,
+                Radius = details.Radius
+            });
+        }
+
         public GameObject DrawArrow(string key, ArrowDetails arrowData) {
             var llength = 10;
 
@@ -60,8 +77,15 @@ namespace D3DLab.App.Shell.Plugin {
             return new SingleVisualObject(en.Tag, key);
         }
 
+        public void DrawObject(GameObject obj) {
+
+        }
+
+
         public void MoveCameraToEntity(GameObject obj) {
             obj.AddComponent(Context, ZoomToObjectComponent.Create());
         }
+
+        public GraphicEntity GetWorld() => Context.GetEntityManager().GetEntity(scene.Engine.WorldTag);
     }
 }

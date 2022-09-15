@@ -109,7 +109,7 @@ namespace D3DLab.Debugger.D3D {
             }
 
             foreach (var sys in Context.GetSystemManager().GetSystems<RenderSystem>()) {
-                sys.Init(engine.Graphics);
+                sys.Init(Engine.Graphics);
             }
 
             OnHandleCreated(obj);

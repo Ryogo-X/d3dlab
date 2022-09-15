@@ -116,8 +116,10 @@ namespace D3DLab.App.Shell.D3D {
 
 
         public void ZoomToAllObjects() {
-            Context.GetComponentManager().UpdateComponents(engine.WorldTag, ZoomToAllCompponent.Create());
+            Context.GetComponentManager().UpdateComponents(Engine.WorldTag, ZoomToAllCompponent.Create());
         }
+
+        public ElementTag GetWorldTag() => Engine.WorldTag;
 
         public override void Dispose() {
             base.Dispose();

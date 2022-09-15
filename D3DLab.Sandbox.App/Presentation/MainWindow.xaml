@@ -11,6 +11,16 @@
         Title="{Binding WinTitle}"
         Background="{StaticResource BlackBackgroundColor}"
         Height="450" Width="800">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/D3DLab.App.Shell;component/Tabs/TabResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -34,6 +44,15 @@
                             HostLoaded="{Binding HostLoadedCommand}">
             </host:FormsHost>
         </Grid>
+
+        <TabControl Grid.Row="1" Grid.Column="4" Grid.RowSpan="5" 
+                    ItemsSource="{Binding RightTabs}" IsSynchronizedWithCurrentItem="True" SelectedIndex="0">
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <ContentPresenter Content="{Binding Content}" />
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
 
     </Grid>
 </Window>

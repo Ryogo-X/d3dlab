@@ -1,5 +1,6 @@
 ﻿using D3DLab.App.Shell.D3D;
 using D3DLab.App.Shell.Plugin;
+using D3DLab.App.Shell.Tabs;
 using D3DLab.App.Shell.TopPanel;
 using D3DLab.Debugger;
 using D3DLab.ECS;
@@ -417,7 +418,7 @@ namespace D3DLab.Viewer.Presentation {
         void IPluginHandler.Handle(LoadedPlugin pl) {
             var objs = new List<IPluginLoadedObjectDetails>();
 
-            var plctx = new PluginContext(new PluginScene(context), pl.File.Directory, pluginLoadedObjects);
+            var plctx = new PluginContext(new PluginScene(context, d3dScene), pl.File.Directory, pluginLoadedObjects);
 
             if (!pl.IsResourcesLoaded) {
                 try {

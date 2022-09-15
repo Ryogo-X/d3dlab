@@ -162,8 +162,7 @@ namespace D3DLab.ECS {
             systemsOrder = new Dictionary<Type, int>();
         }
         public EntityOrderContainer RegisterOrder<TSys>(ElementTag tag,int index) {
-            OrderSystemContainer ordering;
-            if (!componentOrderIndex.TryGetValue(tag, out ordering)) {
+            if (!componentOrderIndex.TryGetValue(tag, out var ordering)) {
                 ordering = new OrderSystemContainer();
                 componentOrderIndex.Add(tag, ordering);
             }
@@ -176,8 +175,7 @@ namespace D3DLab.ECS {
         }
 
         public EntityOrderContainer RegisterOrder<TSys>(ElementTag tag) {
-            OrderSystemContainer ordering;
-            if (!componentOrderIndex.TryGetValue(tag, out ordering)) {
+            if (!componentOrderIndex.TryGetValue(tag, out var ordering)) {
                 ordering = new OrderSystemContainer();
                 componentOrderIndex.Add(tag, ordering);
             }

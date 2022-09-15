@@ -20,6 +20,8 @@ using WPFLab.MVVM;
 using D3DLab.Toolkit;
 using System.Numerics;
 using D3DLab.Sandbox.App.Infrastructure;
+using System.Collections.ObjectModel;
+using D3DLab.App.Shell.Tabs;
 
 namespace D3DLab.Sandbox.App.Presentation {
     internal class MainWindowViewModel : BaseNotify,
@@ -41,6 +43,7 @@ namespace D3DLab.Sandbox.App.Presentation {
         public BaseWPFCommand<bool> ShowWorldCoordinateSystemCommand { get; }
         public BaseWPFCommand<bool> ManipulatorToolEnabledCommand { get; }
         public GraphicsInfo GraphicsInfo { get; }
+        public ObservableCollection<TabItemViewModel> RightTabs { get; }
 
 
         public MainWindowViewModel(MainWindow mainWin, DialogManager dialogs, AppLogger logger) {
@@ -50,9 +53,11 @@ namespace D3DLab.Sandbox.App.Presentation {
             plugins = new PluginProxy(Path.Combine(AppContext.BaseDirectory, "plugins"));
             //
             GraphicsInfo = new GraphicsInfo();
+            RightTabs = new ObservableCollection<TabItemViewModel>();
             //
             HostLoadedCommand = new WpfActionCommand<FormsHost>(OnHostLoaded);
             OpenPluginsWindowCommand = new WpfActionCommand(OnOpenPlugins);
+            ShowWorldCoordinateSystemCommand = new WpfActionCommand<bool>(OnShowWorldCoordinateSystem);
             //
 
             notificator = new EngineNotificator();
@@ -67,6 +72,7 @@ namespace D3DLab.Sandbox.App.Presentation {
 
             plugins.Load();
         }
+
 
         #region d3d scene
 
@@ -106,7 +112,7 @@ namespace D3DLab.Sandbox.App.Presentation {
         }
 
         void IPluginHandler.Handle(LoadedPlugin pl) {
-            var plctx = new PluginContext(new PluginScene(context), pl.File.Directory, new PluginObservableCollection());
+            var plctx = new PluginContext(new PluginScene(context, d3dScene), pl.File.Directory, new PluginObservableCollection());
 
             if (!pl.IsResourcesLoaded) {
                 try {
@@ -119,8 +125,7 @@ namespace D3DLab.Sandbox.App.Presentation {
 
             var vm = pl.Plugin.ExecuteAsComponent(plctx);
 
-            //LeftTabs.Add(new TabItemViewModel(pl.Plugin.Name,
-            //    new TabPanelPluginContent(vm)));
+            RightTabs.AddTabWithPluginContent(pl.Plugin.Name, vm);
 
             mainWin.Dispatcher.InvokeAsync(() => {
                 vm.Init();
@@ -129,6 +134,14 @@ namespace D3DLab.Sandbox.App.Presentation {
             dialogs.Plugins.Close();
         }
 
-       
+
+        void OnShowWorldCoordinateSystem(bool _checked) {
+            if (_checked) {
+                d3dScene.CoordinateSystem.Show(context);
+            } else {
+                d3dScene.CoordinateSystem.Hide(context);
+            }
+        }
+
     }
 }

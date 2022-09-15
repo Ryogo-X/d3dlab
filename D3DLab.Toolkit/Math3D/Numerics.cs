@@ -2,6 +2,8 @@
 
 using g3;
 
+using SharpDX;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -62,6 +64,19 @@ namespace System.Numerics {
         readonly AxisAlignedBox3f boxf;
         readonly AxisAlignedBox3d boxd;
 
+
+        public AxisAlignedBox(float w, float h, float l, Vector3 center) {
+            var halfW = w * 0.5f;
+            var halfH = h * 0.5f;
+            var halfL = l * 0.5f;
+            Center = center;
+            Maximum = new Vector3(Center.X + halfW, Center.Y + halfL, Center.Z + halfH);
+            Minimum = new Vector3(Center.X - halfW, Center.Y - halfL, Center.Z - halfH);
+            Dimensions = Maximum - Minimum;
+            Diagonal = Dimensions.Length();
+            boxf = new AxisAlignedBox3f(Minimum.X, Minimum.Y, Minimum.Z, Maximum.X, Maximum.Y, Maximum.Z);
+            boxd = boxf;
+        }
         public AxisAlignedBox(Vector3 minimum, Vector3 maximum) {
             Minimum = minimum;
             Maximum = maximum;
@@ -87,6 +102,29 @@ namespace System.Numerics {
         public AlignedBoxContainmentType Contains(AxisAlignedBox other) {
             return Contains(ref other);
         }
+
+        public AlignedBoxContainmentType ContainsSphere(Vector3 center, float radius) {
+            var result = Vector3.Clamp(center, Minimum, Maximum);
+            if (Vector3.DistanceSquared(center, result) > radius * radius) {
+                return AlignedBoxContainmentType.Disjoint;
+            }
+
+            if (Minimum.X + radius <= center.X 
+                && center.X <= Maximum.X - radius 
+                && Maximum.X - Minimum.X > radius 
+                && Minimum.Y + radius <= center.Y 
+                && center.Y <= Maximum.Y - radius 
+                && Maximum.Y - Minimum.Y > radius 
+                && Minimum.Z + radius <= center.Z 
+                && center.Z <= Maximum.Z - radius 
+                && Maximum.Z - Minimum.Z > radius) {
+                return AlignedBoxContainmentType.Contains;
+            }
+
+            return AlignedBoxContainmentType.Intersects;
+        }
+
+
         public AlignedBoxContainmentType Contains(ref AxisAlignedBox other) {
             if (Maximum.X < other.Minimum.X || Minimum.X > other.Maximum.X
                 || Maximum.Y < other.Minimum.Y || Minimum.Y > other.Maximum.Y

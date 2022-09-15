@@ -85,11 +85,15 @@ namespace D3DLab.ECS {
         }
 
         public IComponentManager AddComponent<T>(ElementTag tagEntity, T com, out Task awaiter) where T : IGraphicComponent {
-            if (typeof(T) == typeof(IGraphicComponent)) {
+            var _type = typeof(T);
+            if (_type == typeof(IGraphicComponent)) {
                 throw new NotSupportedException("IGraphicComponent is incorrect type, must be the certain component type.");
             }
             if (components.ContainsKey(com.Tag)) {
                 throw new NotSupportedException($"Component {typeof(T)} '{com.Tag}' is already belong to other Entity.");
+            }
+            if (entities.TryGetValue(tagEntity, out var map) && map.ContainsKey(_type)) {
+                throw new NotSupportedException($"Component type {typeof(T)} is already exist in '{com.Tag}' Entity.");
             }
 
             awaiter = comSynchronizer.Add((owner, inp) => owner._AddComponent(tagEntity, inp), com);

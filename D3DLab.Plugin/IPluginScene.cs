@@ -16,14 +16,23 @@ namespace D3DLab.Plugin {
         public float Length;
         public float Radius;
     }
+    public struct PointDetails {
+        public Vector3 Center;
+        public Vector4 Color;
+        public float Radius;
+    }
 
     public interface IPluginScene {
         public IContextState Context { get; }
 
-        GameObject DrawPoint(string key, Vector3 center, Vector4 color);
+        GameObject DrawPoint(string key, PointDetails details);
+        GameObject DrawPoint(ElementTag tag, PointDetails details);
         GameObject DrawArrow(string key, ArrowDetails ad);
         GameObject DrawPolyline(string key, Vector3[] margin, Vector4 green);
         GameObject DrawCylinder(string key, CylinderDetails cyl);
+        void DrawObject(GameObject obj);
         void MoveCameraToEntity(GameObject obj);
+        GraphicEntity GetWorld();
+        void SetContinuouslyRender(bool enable);
     }
 }

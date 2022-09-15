@@ -27,6 +27,7 @@ namespace D3DLab.ECS.Render {
         public ElementTag WorldTag { get; }
         public ElementTag CameraTag { get; }
 
+        public bool IsContinuouslyRender { get; set; }
 
         readonly IInputManager InputManager;
      
@@ -117,7 +118,7 @@ namespace D3DLab.ECS.Render {
 
             syncContext.Synchronize(managedThreadId);
 
-            if (!isnap.Events.Any() && !changed) {//no input no rendering 
+            if (!isnap.Events.Any() && !changed && !IsContinuouslyRender) {//no input no rendering 
                 return false;
             }
 

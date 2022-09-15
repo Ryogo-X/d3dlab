@@ -75,7 +75,7 @@ namespace D3DLab.Toolkit.Render {
 
         DefaultInputObserver input;
 
-        protected RenderEngine engine;
+        public RenderEngine Engine { get; private set; }
 
         public IContextState Context { get; }
         public WpfWindows Surface { get; private set; }
@@ -95,9 +95,9 @@ namespace D3DLab.Toolkit.Render {
             loker = new object();
         }
 
-        public AdapterDescription GetAdapterDescription() => engine.Graphics.Device.Adapter;
+        public AdapterDescription GetAdapterDescription() => Engine.Graphics.Device.Adapter;
         public PerfomanceComponent GetPerfomanceState() {
-            return Context.GetEntityManager().GetEntity(engine.WorldTag).GetComponent<PerfomanceComponent>();
+            return Context.GetEntityManager().GetEntity(Engine.WorldTag).GetComponent<PerfomanceComponent>();
         }
         private void OnUnloaded(object sender, RoutedEventArgs e) {
             Dispose();
@@ -107,10 +107,10 @@ namespace D3DLab.Toolkit.Render {
             lock (loker) {
                 input = CreateInputObserver(win, overlay);
                 Surface = new WpfWindows(win, host, input);
-                engine = RenderEngine.Create(Surface, Surface.InputManager, Context, notify);
-                engine.Run(notify);
+                Engine = RenderEngine.Create(Surface, Surface.InputManager, Context, notify);
+                Engine.Run(notify);
             }
-            SceneInitialization(Context, engine, engine.CameraTag);
+            SceneInitialization(Context, Engine, Engine.CameraTag);
 
         }
 
@@ -122,7 +122,7 @@ namespace D3DLab.Toolkit.Render {
             host.HandleCreated -= OnHandleCreated;
             host.Unloaded -= OnUnloaded;
             lock (loker) {
-                engine?.Dispose();
+                Engine?.Dispose();
                 input?.Dispose();
                 //Window.Dispose();
                 Context?.Dispose();

@@ -36,7 +36,11 @@ namespace D3DLab.ECS {
     public interface INestedGraphicSystem {
         int OrderId { get; set; }
     }
-    public abstract class ContainerSystem<TNestedSystem> : BaseEntitySystem where TNestedSystem : INestedGraphicSystem {
+    public abstract class ContainerSystem<TNestedSystem> : BaseEntitySystem, IGraphicSystemContextDependent
+        where TNestedSystem : INestedGraphicSystem {
+
+        public IContextState ContextState { set; protected get; }
+
         readonly SynchronizationContext<ContainerSystem<TNestedSystem>, TNestedSystem> synchronization;
         protected readonly List<TNestedSystem> nested;
 
@@ -48,6 +52,9 @@ namespace D3DLab.ECS {
         public ContainerSystem<TNestedSystem> CreateNested<T>() where T : TNestedSystem {
             synchronization.Add((owner, tech) => {
                 tech.OrderId = owner.nested.Count;
+                if (tech is IGraphicSystemContextDependent dependent) {
+                    dependent.ContextState = ContextState;
+                }
                 owner.nested.Add(tech);
             }, Activator.CreateInstance<T>());
             return this;

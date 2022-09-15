@@ -21,6 +21,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="..\Modules\ModulesDictionary.xaml"/>
+                <ResourceDictionary Source="/D3DLab.App.Shell;component/Tabs/TabResources.xaml"/>
                 <ResourceDictionary>
                     <con:BooleanToVisibilityConverter x:Key="BoolToVis"/>
                     <DataTemplate DataType="{x:Type comp:BoundingBoxDetailsViewModel}">
@@ -38,9 +39,7 @@
                     </DataTemplate>
                     
                     <!--left panel-->
-                    <DataTemplate DataType="{x:Type pres:TabPanelPluginContent}">
-                        <ContentPresenter Content="{Binding PluginViewModel}" />
-                    </DataTemplate>
+                   
 
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>

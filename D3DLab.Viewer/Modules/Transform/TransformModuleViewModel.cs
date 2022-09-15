@@ -1,4 +1,5 @@
-﻿using D3DLab.ECS.Ext;
+﻿using D3DLab.App.Shell.Tabs;
+using D3DLab.ECS.Ext;
 using D3DLab.Viewer.Presentation;
 
 using System;
